@@ -8,5 +8,5 @@
 .brand-logo{display:block;width:118px;height:auto}.dash-sidebar .brand-logo{width:91px;margin-inline:auto}.footer-brand .brand-logo{width:125px}
 .footer{overflow:hidden}.footer::after{content:"";display:block;width:min(84vw,1320px);height:clamp(110px,18vw,255px);margin:16px auto -34px;background:url('/wsool-color.png') center top/contain no-repeat;filter:grayscale(1) brightness(0) invert(1);opacity:.075;mask-image:linear-gradient(to bottom,#000 0%,#000 35%,transparent 100%);pointer-events:none}
 @media(max-width:700px){.footer::after{width:90vw;height:110px;margin:20px auto -38px}}
-.dark-top{overflow-x:clip}.hero{position:relative;isolation:isolate}.hero::before{content:"";position:absolute;z-index:0;left:calc(50% - 820px);top:12px;width:min(68vw,760px);aspect-ratio:1;background:url('/w-symbol-outline.svg') center/contain no-repeat;opacity:.16;transform:rotate(-12deg);pointer-events:none}.hero>*{position:relative;z-index:1}
-@media(max-width:700px){.hero::before{left:-165px;top:105px;width:410px;opacity:.16}}
+.dark-top{overflow-x:clip}.hero{position:relative;isolation:isolate}.hero::before{content:"";position:absolute;z-index:0;left:calc(50% - 1000px);top:-65px;width:min(90vw,1100px);aspect-ratio:1;background:url('/w-symbol-outline.svg') center/contain no-repeat;opacity:.2;mask-image:linear-gradient(to right,#000 8%,#000 28%,transparent 76%);transform:rotate(-12deg);pointer-events:none}.hero>*{position:relative;z-index:1}
+@media(max-width:700px){.hero::before{left:-205px;top:80px;width:560px;opacity:.28}}
