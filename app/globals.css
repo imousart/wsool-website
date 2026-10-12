@@ -10,3 +10,5 @@
 @media(max-width:700px){.footer::after{width:90vw;height:110px;margin:20px auto -38px}}
 .dark-top{overflow-x:clip}.hero{position:relative;isolation:isolate}.hero::before{content:"";position:absolute;z-index:0;left:calc(50% - 1000px);top:-65px;width:min(90vw,1100px);aspect-ratio:1;background:url('/w-symbol-outline.svg') center/contain no-repeat;opacity:.2;mask-image:linear-gradient(to right,#000 8%,#000 28%,transparent 76%);transform:rotate(-12deg);pointer-events:none}.hero>*{position:relative;z-index:1}
 @media(max-width:700px){.hero::before{left:-205px;top:80px;width:560px;opacity:.28}}
+.story-wrap{position:relative;isolation:isolate}.tracking-line{position:absolute;z-index:2;top:0;bottom:0;left:max(4px,calc((100vw - 1136px)/2 - 154px));width:min(126px,calc((100vw - 1136px)/2 - 28px));height:100%;overflow:visible;pointer-events:none}.tracking-line path{fill:none;stroke:#22ca7b;stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}.tracking-base{opacity:.16}.tracking-progress{opacity:0;filter:drop-shadow(0 0 3px #27e68b70)}
+@media(max-width:1240px){.tracking-line{display:none}}
