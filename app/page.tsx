@@ -146,13 +146,13 @@ export default function Home() {
       const elapsed = previousTime ? Math.min(now - previousTime, 64) : 16;
       previousTime = now;
       const current = window.scrollY;
-      const next = current + (target - current) * (1 - Math.exp(-elapsed / 145));
+      const next = current + (target - current) * (1 - Math.exp(-elapsed / 55));
       if (Math.abs(target - next) < .5) {
-        window.scrollTo(0, target);
+        window.scrollTo({ top: target, behavior: 'instant' });
         frame = 0;
         return;
       }
-      window.scrollTo(0, next);
+      window.scrollTo({ top: next, behavior: 'instant' });
       frame = requestAnimationFrame(animate);
     };
 
