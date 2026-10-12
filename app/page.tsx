@@ -35,7 +35,7 @@ function TrackingLine() {
     const path = svg?.querySelector('path');
     if (!svg || !wrapper || !path) return;
 
-    const sections = Array.from(wrapper.querySelectorAll<HTMLElement>(':scope > section, :scope > footer'));
+    const sections = Array.from(wrapper.querySelectorAll<HTMLElement>(':scope > section'));
     let pathLength = 0;
     let wrapperHeight = 0;
     let frame = 0;
@@ -48,7 +48,7 @@ function TrackingLine() {
       const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
       const scroll = window.scrollY;
       let targetY = window.innerHeight / 2 - wrapper.getBoundingClientRect().top;
-      // At the bottom of the page, finish the route at the footer's lower edge.
+      // Complete the route at the end of the final section, before the footer.
       const finishStart = Math.max(0, maxScroll - window.innerHeight);
       const finish = Math.min(1, Math.max(0, (scroll - finishStart) / Math.max(1, maxScroll - finishStart)));
       targetY += Math.max(0, wrapperHeight - targetY) * finish;
@@ -94,7 +94,7 @@ function TrackingLine() {
       sections.forEach((section, index) => {
         const top = section.offsetTop;
         const bottom = top + section.offsetHeight;
-        if (section.tagName === 'FOOTER' || !alternate) {
+        if (!alternate) {
           route.push(`L ${x} ${bottom}`);
           return;
         }
@@ -158,8 +158,8 @@ export default function Home() {
     <section id="contact" className="closing"><div className="container"><span className="spark">
       ✦
       </span><h2>جاهز تنقل وصول شركتك للغد؟</h2><p>أنشئ منظمتك في دقائق وأطلق أول نقطة وصول اليوم</p><div className="closing-buttons"><button className="button primary" onClick={() => setModal('demo')}>اطلب عرضًا تجريبيًا <ArrowLeft size={16} /></button><a className="button ghost" href="mailto:hello@wsool.sa">تواصل مع المبيعات</a></div></div></section>
+    </div>
     <footer className="footer"><div className="container footer-main"><div className="footer-brand">{brand}<p>منصة إدارة الوصول والزوار للشركات، من الدعوة حتى المغادرة.</p><div className="socials"><a href="mailto:hello@wsool.sa" aria-label="البريد الإلكتروني"><Send size={17} /></a><a href="https://www.linkedin.com" aria-label="لينكدإن"><Users size={17} /></a><a href="https://x.com" aria-label="إكس">𝕏</a></div></div><div className="footer-links"><div><b>الدعم</b><a href="#faq">مركز المساعدة</a><a href="mailto:hello@wsool.sa">تواصل معنا</a><a href="#faq">حالة الخدمة</a></div><div><b>الشركة</b><a href="#customers">من نحن</a><a href="mailto:hello@wsool.sa">الوظائف</a><a href="#product">المدونة</a></div><div><b>المنتج</b><a href="#product">الميزات</a><a href="#pricing">الأسعار</a><a href="mailto:hello@wsool.sa">API تكامل</a></div></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} وصول. جميع الحقوق محفوظة · صنع في السعودية</span><span><a href="mailto:hello@wsool.sa?subject=سياسة%20الاستخدام">سياسة الاستخدام</a><a href="mailto:hello@wsool.sa?subject=الشروط">الشروط</a><a href="mailto:hello@wsool.sa?subject=الخصوصية">الخصوصية</a></span></div></footer>
     {modal && createPortal(<div className="modal-backdrop" onClick={() => setModal(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={modal === 'demo' ? 'طلب عرض تجريبي' : 'العرض التوضيحي'} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setModal(null)} aria-label="إغلاق"><X size={20} /></button>{modal === 'video' ? <><span className="icon solid"><Play /></span><h2>شاهد وصول أثناء العمل</h2><p>من إرسال الدعوة حتى تأكيد وصول الزائر، كل خطوة واضحة وسريعة.</p><div className="video-preview"><div className="walkthrough-icon">{demoStep === 0 ? <MapPin size={44} /> : demoStep === 1 ? <Send size={44} /> : <ScanLine size={44} />}</div><strong>{['أنشئ نقطة الوصول', 'أرسل الدعوة', 'استقبل الزائر'][demoStep]}</strong><span>{['حدّد الفرع والصلاحيات وطريقة الدخول.', 'يصل رابط الزيارة إلى جوال ضيفك مباشرة.', 'امسح الرمز وسجّل وصوله في لوحة التحكم.'][demoStep]}</span><div className="demo-dots">{[0, 1, 2].map(i => <button key={i} className={demoStep === i ? 'active' : ''} aria-label={`الخطوة ${i + 1}`} onClick={() => setDemoStep(i)} />)}</div></div><button className="button primary" onClick={() => setDemoStep((demoStep + 1) % 3)}>الخطوة التالية <ArrowLeft size={16} /></button></> : <><span className="icon solid"><CheckCheck /></span><h2>جرّب وصول مع فريقك</h2><p>أرسل لنا بريدك وسنتواصل معك لترتيب عرض مخصص.</p><form onSubmit={e => { e.preventDefault(); const form = e.currentTarget; const data = new FormData(form); window.location.href = `mailto:hello@wsool.sa?subject=${encodeURIComponent('طلب عرض تجريبي - وصول')}&body=${encodeURIComponent(`الاسم: ${data.get('name')}\nالشركة: ${data.get('company')}\nالبريد: ${data.get('email')}`)}`; setModal(null) }}><label>الاسم<input name="name" required placeholder="اسمك الكامل" /></label><label>اسم الشركة<input name="company" required placeholder="اسم شركتك" /></label><label>البريد الإلكتروني<input type="email" name="email" required placeholder="name@company.com" /></label><button className="button primary" type="submit">إرسال الطلب <ArrowLeft size={16} /></button></form></>}</div></div>, document.body)}
-    </div>
   </main></div></>
 }
