@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { ArrowLeft, Bell, Building2, Check, CheckCheck, ChevronLeft, Clock3, FileText, LayoutDashboard, Link2, MapPin, Menu, Play, Quote, ScanLine, Send, Settings, ShieldCheck, Users, Wifi, X } from 'lucide-react';
 
 const brand = <Image className="brand-logo" src="/wsool-color.png" alt="وصول" width={872} height={168} priority />;
@@ -35,7 +37,6 @@ function TrackingLine() {
 
     const sections = Array.from(wrapper.querySelectorAll<HTMLElement>(':scope > section, :scope > footer'));
     let pathLength = 0;
-    let wrapperTop = 0;
     let wrapperHeight = 0;
     let frame = 0;
     let drawnLength = Number.NaN;
@@ -46,7 +47,7 @@ function TrackingLine() {
       if (!pathLength) return;
       const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
       const scroll = window.scrollY;
-      let targetY = scroll + window.innerHeight / 2 - wrapperTop;
+      let targetY = window.innerHeight / 2 - wrapper.getBoundingClientRect().top;
       // At the bottom of the page, finish the route at the footer's lower edge.
       const finishStart = Math.max(0, maxScroll - window.innerHeight);
       const finish = Math.min(1, Math.max(0, (scroll - finishStart) / Math.max(1, maxScroll - finishStart)));
@@ -80,7 +81,6 @@ function TrackingLine() {
     const measure = () => {
       if (frame) cancelAnimationFrame(frame);
       frame = 0;
-      wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
       wrapperHeight = wrapper.offsetHeight;
       const content = wrapper.querySelector<HTMLElement>('.steps-section .container');
       const gutter = content?.getBoundingClientRect().left ?? 0;
@@ -92,7 +92,7 @@ function TrackingLine() {
       const route = [`M ${x} 0`];
 
       sections.forEach((section, index) => {
-        const top = section.getBoundingClientRect().top + window.scrollY - wrapperTop;
+        const top = section.offsetTop;
         const bottom = top + section.offsetHeight;
         if (section.tagName === 'FOOTER' || !alternate) {
           route.push(`L ${x} ${bottom}`);
@@ -122,11 +122,13 @@ function TrackingLine() {
     sections.forEach(section => observer.observe(section));
     window.addEventListener('resize', measure);
     window.addEventListener('scroll', scheduleProgress, { passive: true });
+    gsap.ticker.add(scheduleProgress);
     measure();
     return () => {
       observer.disconnect();
       window.removeEventListener('resize', measure);
       window.removeEventListener('scroll', scheduleProgress);
+      gsap.ticker.remove(scheduleProgress);
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
@@ -137,66 +139,12 @@ function TrackingLine() {
 export default function Home() {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    let target = window.scrollY;
-    let frame = 0;
-    let previousTime = 0;
-
-    const animate = (now: number) => {
-      const elapsed = previousTime ? Math.min(now - previousTime, 64) : 16;
-      previousTime = now;
-      const current = window.scrollY;
-      const next = current + (target - current) * (1 - Math.exp(-elapsed / 55));
-      if (Math.abs(target - next) < .5) {
-        window.scrollTo({ top: target, behavior: 'instant' });
-        frame = 0;
-        return;
-      }
-      window.scrollTo({ top: next, behavior: 'instant' });
-      frame = requestAnimationFrame(animate);
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      if (event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
-      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      const scrollable = (event.target as Element | null)?.closest('[data-native-scroll]');
-      if (scrollable) return;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (maxScroll <= 0) return;
-      event.preventDefault();
-      const amount = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
-      if (!frame) target = window.scrollY;
-      target = Math.min(maxScroll, Math.max(0, target + amount));
-      if (!frame) frame = requestAnimationFrame(animate);
-    };
-
-    const onExternalScroll = () => {
-      if (!frame) target = window.scrollY;
-    };
-
-    const stopAnimation = () => {
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-      previousTime = 0;
-      target = window.scrollY;
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('scroll', onExternalScroll, { passive: true });
-    window.addEventListener('touchstart', stopAnimation, { passive: true });
-    window.addEventListener('keydown', stopAnimation);
-    window.addEventListener('hashchange', stopAnimation);
-    return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('scroll', onExternalScroll);
-      window.removeEventListener('touchstart', stopAnimation);
-      window.removeEventListener('keydown', stopAnimation);
-      window.removeEventListener('hashchange', stopAnimation);
-      stopAnimation();
-    };
+    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+    const smoother = ScrollSmoother.create({ wrapper: '#smooth-wrapper', content: '#smooth-content', smooth: .8, smoothTouch: 0 });
+    return () => smoother.kill();
   }, []);
 
-  const root = useRef<HTMLElement>(null); const [menuOpen, setMenuOpen] = useState(false); const [activeFaq, setActiveFaq] = useState(0); const [modal, setModal] = useState<'demo' | 'video' | null>(null); const [demoStep, setDemoStep] = useState(0); useEffect(() => { gsap.registerPlugin(ScrollTrigger); const ctx = gsap.context(() => { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; gsap.from('.hero-animate', { y: 30, autoAlpha: 0, duration: .9, stagger: .13, ease: 'power3.out', delay: .15 }); gsap.utils.toArray<HTMLElement>('.reveal').forEach(el => gsap.from(el, { y: 38, opacity: .55, duration: .8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } })); }, root); return () => ctx.revert() }, []); return <main ref={root}>
+  const root = useRef<HTMLElement>(null); const [menuOpen, setMenuOpen] = useState(false); const [activeFaq, setActiveFaq] = useState(0); const [modal, setModal] = useState<'demo' | 'video' | null>(null); const [demoStep, setDemoStep] = useState(0); useEffect(() => { gsap.registerPlugin(ScrollTrigger); const ctx = gsap.context(() => { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; gsap.from('.hero-animate', { y: 30, autoAlpha: 0, duration: .9, stagger: .13, ease: 'power3.out', delay: .15 }); gsap.utils.toArray<HTMLElement>('.reveal').forEach(el => gsap.from(el, { y: 38, opacity: .55, duration: .8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } })); }, root); return () => ctx.revert() }, []); return <><div id="smooth-wrapper"><main id="smooth-content" ref={root}>
     <div className="announcement"><span className="new-pill">جديد</span><span>جديد · مسح رمز الزائر من الجوال في ثانية واحدة</span><ArrowLeft size={15} /></div>
     <div className="dark-top"><header className="site-header container"><a href="#top" aria-label="وصول الرئيسية">{brand}</a><nav className={menuOpen ? 'nav open' : 'nav'}>{links.map(([label, href]) => <a onClick={() => setMenuOpen(false)} key={href} href={href}>{label}</a>)}</nav><div className="header-actions"><button className="login" onClick={() => setModal('demo')}>تسجيل الدخول</button><button className="button primary header-cta" onClick={() => setModal('demo')}>اطلب عرضًا تجريبيًا <ArrowLeft size={16} /></button></div><button className="menu-toggle" aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button></header>
       <section id="top" className="hero container"><div className="hero-copy"><h1 className="hero-animate">استقبل زوارك<br /><em>بضغطة واحدة</em></h1><p className="hero-animate">وصول ينظّم دعوة الزوار والمناديب، يوجّههم إلى الشخص المناسب، ويسجّل كل دخول وخروج في لوحة واحدة.</p><div className="hero-buttons hero-animate"><button className="button primary" onClick={() => setModal('demo')}>اطلب عرضًا تجريبيًا <ArrowLeft size={17} /></button><button className="button ghost" onClick={() => setModal('video')}>شاهد العرض التوضيحي <Play size={16} /></button></div><small className="hero-fine hero-animate">بدون بطاقة ائتمانية · الإعداد خلال دقائق</small></div><Dashboard /><div className="trusted">موثوق به من <b>أرامكس</b><b>ثمـان</b><b>المراعي</b><b>سامسونج</b><b>ناقل</b></div></section></div>
@@ -211,7 +159,7 @@ export default function Home() {
       ✦
       </span><h2>جاهز تنقل وصول شركتك للغد؟</h2><p>أنشئ منظمتك في دقائق وأطلق أول نقطة وصول اليوم</p><div className="closing-buttons"><button className="button primary" onClick={() => setModal('demo')}>اطلب عرضًا تجريبيًا <ArrowLeft size={16} /></button><a className="button ghost" href="mailto:hello@wsool.sa">تواصل مع المبيعات</a></div></div></section>
     <footer className="footer"><div className="container footer-main"><div className="footer-brand">{brand}<p>منصة إدارة الوصول والزوار للشركات، من الدعوة حتى المغادرة.</p><div className="socials"><a href="mailto:hello@wsool.sa" aria-label="البريد الإلكتروني"><Send size={17} /></a><a href="https://www.linkedin.com" aria-label="لينكدإن"><Users size={17} /></a><a href="https://x.com" aria-label="إكس">𝕏</a></div></div><div className="footer-links"><div><b>الدعم</b><a href="#faq">مركز المساعدة</a><a href="mailto:hello@wsool.sa">تواصل معنا</a><a href="#faq">حالة الخدمة</a></div><div><b>الشركة</b><a href="#customers">من نحن</a><a href="mailto:hello@wsool.sa">الوظائف</a><a href="#product">المدونة</a></div><div><b>المنتج</b><a href="#product">الميزات</a><a href="#pricing">الأسعار</a><a href="mailto:hello@wsool.sa">API تكامل</a></div></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} وصول. جميع الحقوق محفوظة · صنع في السعودية</span><span><a href="mailto:hello@wsool.sa?subject=سياسة%20الاستخدام">سياسة الاستخدام</a><a href="mailto:hello@wsool.sa?subject=الشروط">الشروط</a><a href="mailto:hello@wsool.sa?subject=الخصوصية">الخصوصية</a></span></div></footer>
-    {modal && <div className="modal-backdrop" onClick={() => setModal(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={modal === 'demo' ? 'طلب عرض تجريبي' : 'العرض التوضيحي'} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setModal(null)} aria-label="إغلاق"><X size={20} /></button>{modal === 'video' ? <><span className="icon solid"><Play /></span><h2>شاهد وصول أثناء العمل</h2><p>من إرسال الدعوة حتى تأكيد وصول الزائر، كل خطوة واضحة وسريعة.</p><div className="video-preview"><div className="walkthrough-icon">{demoStep === 0 ? <MapPin size={44} /> : demoStep === 1 ? <Send size={44} /> : <ScanLine size={44} />}</div><strong>{['أنشئ نقطة الوصول', 'أرسل الدعوة', 'استقبل الزائر'][demoStep]}</strong><span>{['حدّد الفرع والصلاحيات وطريقة الدخول.', 'يصل رابط الزيارة إلى جوال ضيفك مباشرة.', 'امسح الرمز وسجّل وصوله في لوحة التحكم.'][demoStep]}</span><div className="demo-dots">{[0, 1, 2].map(i => <button key={i} className={demoStep === i ? 'active' : ''} aria-label={`الخطوة ${i + 1}`} onClick={() => setDemoStep(i)} />)}</div></div><button className="button primary" onClick={() => setDemoStep((demoStep + 1) % 3)}>الخطوة التالية <ArrowLeft size={16} /></button></> : <><span className="icon solid"><CheckCheck /></span><h2>جرّب وصول مع فريقك</h2><p>أرسل لنا بريدك وسنتواصل معك لترتيب عرض مخصص.</p><form onSubmit={e => { e.preventDefault(); const form = e.currentTarget; const data = new FormData(form); window.location.href = `mailto:hello@wsool.sa?subject=${encodeURIComponent('طلب عرض تجريبي - وصول')}&body=${encodeURIComponent(`الاسم: ${data.get('name')}\nالشركة: ${data.get('company')}\nالبريد: ${data.get('email')}`)}`; setModal(null) }}><label>الاسم<input name="name" required placeholder="اسمك الكامل" /></label><label>اسم الشركة<input name="company" required placeholder="اسم شركتك" /></label><label>البريد الإلكتروني<input type="email" name="email" required placeholder="name@company.com" /></label><button className="button primary" type="submit">إرسال الطلب <ArrowLeft size={16} /></button></form></>}</div></div>}
+    {modal && createPortal(<div className="modal-backdrop" onClick={() => setModal(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={modal === 'demo' ? 'طلب عرض تجريبي' : 'العرض التوضيحي'} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setModal(null)} aria-label="إغلاق"><X size={20} /></button>{modal === 'video' ? <><span className="icon solid"><Play /></span><h2>شاهد وصول أثناء العمل</h2><p>من إرسال الدعوة حتى تأكيد وصول الزائر، كل خطوة واضحة وسريعة.</p><div className="video-preview"><div className="walkthrough-icon">{demoStep === 0 ? <MapPin size={44} /> : demoStep === 1 ? <Send size={44} /> : <ScanLine size={44} />}</div><strong>{['أنشئ نقطة الوصول', 'أرسل الدعوة', 'استقبل الزائر'][demoStep]}</strong><span>{['حدّد الفرع والصلاحيات وطريقة الدخول.', 'يصل رابط الزيارة إلى جوال ضيفك مباشرة.', 'امسح الرمز وسجّل وصوله في لوحة التحكم.'][demoStep]}</span><div className="demo-dots">{[0, 1, 2].map(i => <button key={i} className={demoStep === i ? 'active' : ''} aria-label={`الخطوة ${i + 1}`} onClick={() => setDemoStep(i)} />)}</div></div><button className="button primary" onClick={() => setDemoStep((demoStep + 1) % 3)}>الخطوة التالية <ArrowLeft size={16} /></button></> : <><span className="icon solid"><CheckCheck /></span><h2>جرّب وصول مع فريقك</h2><p>أرسل لنا بريدك وسنتواصل معك لترتيب عرض مخصص.</p><form onSubmit={e => { e.preventDefault(); const form = e.currentTarget; const data = new FormData(form); window.location.href = `mailto:hello@wsool.sa?subject=${encodeURIComponent('طلب عرض تجريبي - وصول')}&body=${encodeURIComponent(`الاسم: ${data.get('name')}\nالشركة: ${data.get('company')}\nالبريد: ${data.get('email')}`)}`; setModal(null) }}><label>الاسم<input name="name" required placeholder="اسمك الكامل" /></label><label>اسم الشركة<input name="company" required placeholder="اسم شركتك" /></label><label>البريد الإلكتروني<input type="email" name="email" required placeholder="name@company.com" /></label><button className="button primary" type="submit">إرسال الطلب <ArrowLeft size={16} /></button></form></>}</div></div>, document.body)}
     </div>
-  </main>
+  </main></div></>
 }
