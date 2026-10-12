@@ -140,7 +140,7 @@ export default function Home() {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
-    const smoother = ScrollSmoother.create({ wrapper: '#smooth-wrapper', content: '#smooth-content', smooth: .8, smoothTouch: 0 });
+    const smoother = ScrollSmoother.create({ wrapper: '#smooth-wrapper', content: '#smooth-content', smooth: .3, smoothTouch: 0 });
     return () => smoother.kill();
   }, []);
 
