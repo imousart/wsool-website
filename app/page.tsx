@@ -20,10 +20,10 @@ const faqs = [
 ];
 
 const customerStories = [
-  { name: 'شركة الأفق', mark: 'أ', summary: 'صورة واضحة لكل زيارة، من الدعوة حتى المغادرة.', quote: 'نعرف الآن من في المبنى دون اتصال واحد. توقّف الازدحام عند الاستقبال، وصار سجلّنا جاهزًا للمراجعة في أي لحظة.', role: 'فريق العمليات', tone: 'mint' },
-  { name: 'مجموعة المدار', mark: 'م', summary: 'إدارة نقاط الوصول في عدة فروع من لوحة واحدة.', quote: 'صار لدى كل فرع طريقة استقبال واضحة، ويستطيع الفريق متابعة حركة الزوار من مكان واحد دون تشتت بين الأنظمة.', role: 'إدارة الفروع', tone: 'teal' },
-  { name: 'شركة روافد', mark: 'ر', summary: 'دعوات أسرع وتجربة أبسط للضيوف والمناديب.', quote: 'يصل الزائر وهو يعرف أين يذهب ومن يقابله. خطوات الدخول واضحة للفريق والضيف من أول رسالة.', role: 'فريق الاستقبال', tone: 'lime' },
-  { name: 'شركة السحاب', mark: 'س', summary: 'سجل وصول منظم يساعد الفرق على المتابعة.', quote: 'أصبح لدينا سجل مرتب للحركة اليومية، مع تفاصيل الوصول والخروج لكل نقطة دون الرجوع إلى قوائم ورقية.', role: 'فريق الأمن', tone: 'blue' },
+  { name: 'شركة الأفق', summary: 'صورة واضحة لكل زيارة، من الدعوة حتى المغادرة.', quote: 'نعرف الآن من في المبنى دون اتصال واحد. توقّف الازدحام عند الاستقبال، وصار سجلّنا جاهزًا للمراجعة في أي لحظة.', role: 'فريق العمليات', tone: 'mint' },
+  { name: 'مجموعة المدار', summary: 'إدارة نقاط الوصول في عدة فروع من لوحة واحدة.', quote: 'صار لدى كل فرع طريقة استقبال واضحة، ويستطيع الفريق متابعة حركة الزوار من مكان واحد دون تشتت بين الأنظمة.', role: 'إدارة الفروع', tone: 'teal' },
+  { name: 'شركة روافد', summary: 'دعوات أسرع وتجربة أبسط للضيوف والمناديب.', quote: 'يصل الزائر وهو يعرف أين يذهب ومن يقابله. خطوات الدخول واضحة للفريق والضيف من أول رسالة.', role: 'فريق الاستقبال', tone: 'lime' },
+  { name: 'شركة السحاب', summary: 'سجل وصول منظم يساعد الفرق على المتابعة.', quote: 'أصبح لدينا سجل مرتب للحركة اليومية، مع تفاصيل الوصول والخروج لكل نقطة دون الرجوع إلى قوائم ورقية.', role: 'فريق الأمن', tone: 'blue' },
 ];
 
 function PrimaryButton({ children, href = '#contact', className = '' }: { children: React.ReactNode; href?: string; className?: string }) { return <a className={`button primary ${className}`} href={href}>{children}<ArrowLeft size={17} /></a>; }
@@ -38,12 +38,10 @@ function Testimonials() {
     <div className="testimonial-showcase reveal" role="group" aria-label="قصص الشركات">
       {customerStories.map((story, index) => <article key={story.name} className={`customer-card story-${story.tone}${active === index ? ' active' : ''}`}>
         <button type="button" className="customer-card-select" onClick={() => setActive(index)} aria-label={`عرض قصة ${story.name}`} aria-pressed={active === index} />
-        <span className="customer-card-mark" aria-hidden="true">{story.mark}</span>
-        <span className="customer-card-preview" aria-hidden={active === index}>{story.name}</span>
+        <span className="customer-card-mark" aria-hidden="true" />
         <div className="customer-card-detail" aria-hidden={active !== index}>
-          <span className="story-index">0{index + 1} / 0{customerStories.length}</span>
           <div className="testimonial-feature-name"><strong>{story.name}</strong><p>{story.summary}</p></div>
-          <div className="testimonial-feature-bottom"><Quote size={30} aria-hidden="true" /><blockquote>{story.quote}</blockquote><div className="story-byline"><span className="story-avatar">{story.mark}</span><span><b>{story.role}</b><small>{story.name} · نموذج توضيحي</small></span></div></div>
+          <div className="testimonial-feature-bottom"><Quote size={30} aria-hidden="true" /><blockquote>{story.quote}</blockquote><div className="story-byline"><span><b>{story.role}</b><small>{story.name} · نموذج توضيحي</small></span></div></div>
         </div>
       </article>)}
     </div>
