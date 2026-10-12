@@ -135,6 +135,67 @@ function TrackingLine() {
 }
 
 export default function Home() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let target = window.scrollY;
+    let frame = 0;
+    let previousTime = 0;
+
+    const animate = (now: number) => {
+      const elapsed = previousTime ? Math.min(now - previousTime, 64) : 16;
+      previousTime = now;
+      const current = window.scrollY;
+      const next = current + (target - current) * (1 - Math.exp(-elapsed / 145));
+      if (Math.abs(target - next) < .5) {
+        window.scrollTo(0, target);
+        frame = 0;
+        return;
+      }
+      window.scrollTo(0, next);
+      frame = requestAnimationFrame(animate);
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      const scrollable = (event.target as Element | null)?.closest('[data-native-scroll]');
+      if (scrollable) return;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (maxScroll <= 0) return;
+      event.preventDefault();
+      const amount = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
+      if (!frame) target = window.scrollY;
+      target = Math.min(maxScroll, Math.max(0, target + amount));
+      if (!frame) frame = requestAnimationFrame(animate);
+    };
+
+    const onExternalScroll = () => {
+      if (!frame) target = window.scrollY;
+    };
+
+    const stopAnimation = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      previousTime = 0;
+      target = window.scrollY;
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('scroll', onExternalScroll, { passive: true });
+    window.addEventListener('touchstart', stopAnimation, { passive: true });
+    window.addEventListener('keydown', stopAnimation);
+    window.addEventListener('hashchange', stopAnimation);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('scroll', onExternalScroll);
+      window.removeEventListener('touchstart', stopAnimation);
+      window.removeEventListener('keydown', stopAnimation);
+      window.removeEventListener('hashchange', stopAnimation);
+      stopAnimation();
+    };
+  }, []);
+
   const root = useRef<HTMLElement>(null); const [menuOpen, setMenuOpen] = useState(false); const [activeFaq, setActiveFaq] = useState(0); const [modal, setModal] = useState<'demo' | 'video' | null>(null); const [demoStep, setDemoStep] = useState(0); useEffect(() => { gsap.registerPlugin(ScrollTrigger); const ctx = gsap.context(() => { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; gsap.from('.hero-animate', { y: 30, autoAlpha: 0, duration: .9, stagger: .13, ease: 'power3.out', delay: .15 }); gsap.utils.toArray<HTMLElement>('.reveal').forEach(el => gsap.from(el, { y: 38, opacity: .55, duration: .8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } })); }, root); return () => ctx.revert() }, []); return <main ref={root}>
     <div className="announcement"><span className="new-pill">جديد</span><span>جديد · مسح رمز الزائر من الجوال في ثانية واحدة</span><ArrowLeft size={15} /></div>
     <div className="dark-top"><header className="site-header container"><a href="#top" aria-label="وصول الرئيسية">{brand}</a><nav className={menuOpen ? 'nav open' : 'nav'}>{links.map(([label, href]) => <a onClick={() => setMenuOpen(false)} key={href} href={href}>{label}</a>)}</nav><div className="header-actions"><button className="login" onClick={() => setModal('demo')}>تسجيل الدخول</button><button className="button primary header-cta" onClick={() => setModal('demo')}>اطلب عرضًا تجريبيًا <ArrowLeft size={16} /></button></div><button className="menu-toggle" aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button></header>
