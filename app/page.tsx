@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowLeft, Bell, Building2, Check, CheckCheck, ChevronLeft, Clock3, FileText, LayoutDashboard, Link2, MapPin, Menu, Play, Quote, ScanLine, Send, Settings, ShieldCheck, Users, Wifi, X } from 'lucide-react';
 
-const brand = <span className="brand" dir="ltr">WSOOL</span>;
+const brand = <Image className="brand-logo" src="/wsool-color.png" alt="وصول" width={872} height={168} priority />;
 const links = [['المنتج','#product'],['الحلول','#solutions'],['الأسعار','#pricing'],['العملاء','#customers'],['الدعم','#faq']];
 const faqs = [
   ['هل يحتاج الزائر إلى تحميل تطبيق؟','لا، يفتح الزائر الرابط في متصفح الجوال مباشرة ويعرض رمز الدخول من الشاشة.'],

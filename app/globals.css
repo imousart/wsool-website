@@ -5,3 +5,4 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 .brand{letter-spacing:-1px}.brand-gear{letter-spacing:-2px;font-size:22px}.video-preview{height:220px;text-align:center;padding:20px}.video-preview strong{font-size:18px}.video-preview span{font-size:12px;color:#669787}.walkthrough-icon{height:58px}.demo-dots{display:flex;gap:6px;direction:ltr}.demo-dots button{border:0;width:7px;height:7px;background:#a8d5bf;border-radius:50%;padding:0}.demo-dots button.active{width:20px;border-radius:10px;background:#13ad6e}
 .hero{padding-bottom:110px}
+.brand-logo{display:block;width:118px;height:auto}.dash-sidebar .brand-logo{width:91px;margin-inline:auto}.footer-brand .brand-logo{width:125px}
