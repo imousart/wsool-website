@@ -38,8 +38,10 @@ function TrackingLine() {
     let wrapperTop = 0;
     let wrapperHeight = 0;
     let frame = 0;
+    let drawnLength = Number.NaN;
+    let previousFrame = 0;
 
-    const updateProgress = () => {
+    const updateProgress = (now = performance.now()) => {
       frame = 0;
       if (!pathLength) return;
       const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
@@ -59,7 +61,16 @@ function TrackingLine() {
         if (path.getPointAtLength(middle).y < targetY) low = middle;
         else high = middle;
       }
-      path.style.strokeDashoffset = String(pathLength - (low + high) / 2);
+      const desiredLength = (low + high) / 2;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const elapsed = previousFrame ? Math.min(now - previousFrame, 64) : 16;
+      previousFrame = now;
+      drawnLength = Number.isNaN(drawnLength) || reducedMotion
+        ? desiredLength
+        : drawnLength + (desiredLength - drawnLength) * (1 - Math.exp(-elapsed / 105));
+      if (Math.abs(desiredLength - drawnLength) < .2) drawnLength = desiredLength;
+      path.style.strokeDashoffset = String(pathLength - drawnLength);
+      if (drawnLength !== desiredLength) frame = requestAnimationFrame(updateProgress);
     };
 
     const scheduleProgress = () => {
@@ -67,6 +78,8 @@ function TrackingLine() {
     };
 
     const measure = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
       wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
       wrapperHeight = wrapper.offsetHeight;
       const content = wrapper.querySelector<HTMLElement>('.steps-section .container');
@@ -99,6 +112,8 @@ function TrackingLine() {
       path.setAttribute('d', route.join(' '));
       pathLength = path.getTotalLength();
       path.style.strokeDasharray = String(pathLength);
+      drawnLength = Number.NaN;
+      previousFrame = 0;
       updateProgress();
     };
 
